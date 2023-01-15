@@ -1,6 +1,5 @@
-package com.plcoding.cleanarchitecturenoteapp.feature_note.presentation.notes.components
+package com.plcoding.cleanarchitecturenoteapp.feature_note.presentation.notes
 
-import android.widget.Space
 import androidx.compose.animation.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,14 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import com.plcoding.cleanarchitecturenoteapp.feature_note.presentation.notes.NotesEvent
-import com.plcoding.cleanarchitecturenoteapp.feature_note.presentation.notes.NotesViewModel
+import com.plcoding.cleanarchitecturenoteapp.feature_note.presentation.notes.components.NoteItem
+import com.plcoding.cleanarchitecturenoteapp.feature_note.presentation.notes.components.OrderSection
 import com.plcoding.cleanarchitecturenoteapp.feature_note.presentation.util.Screen
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalAnimationApi::class)
+@ExperimentalAnimationApi
 @Composable
 fun NotesScreen(
     navController: NavController,
@@ -40,7 +38,6 @@ fun NotesScreen(
                     navController.navigate(Screen.AddEditNoteScreen.route)
                 },
                 backgroundColor = MaterialTheme.colors.primary
-
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
             }
@@ -61,26 +58,31 @@ fun NotesScreen(
                     text = "Your note",
                     style = MaterialTheme.typography.h4
                 )
-                IconButton(onClick = {
-                    viewModel.onEvent(NotesEvent.ToggleOrderSection)
-                }) {
-                    Icon(imageVector = Icons.Default.Sort, contentDescription = "Sort")
-
+                IconButton(
+                    onClick = {
+                        viewModel.onEvent(NotesEvent.ToggleOrderSection)
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Sort,
+                        contentDescription = "Sort"
+                    )
                 }
             }
-
             AnimatedVisibility(
                 visible = state.isOrderSectionVisible,
                 enter = fadeIn() + slideInVertically(),
                 exit = fadeOut() + slideOutVertically()
             ) {
-                OrderSection(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
+                OrderSection(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
                     noteOrder = state.noteOrder,
                     onOrderChange = {
                         viewModel.onEvent(NotesEvent.Order(it))
-                    })
+                    }
+                )
             }
             Spacer(modifier = Modifier.height(16.dp))
             LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -91,17 +93,18 @@ fun NotesScreen(
                             .fillMaxWidth()
                             .clickable {
                                 navController.navigate(
-                                    Screen.AddEditNoteScreen.route + "?noteId=${note.id}&noteColor=${note.color}"
+                                    Screen.AddEditNoteScreen.route +
+                                            "?noteId=${note.id}&noteColor=${note.color}"
                                 )
                             },
                         onDeleteClick = {
                             viewModel.onEvent(NotesEvent.DeleteNote(note))
                             scope.launch {
                                 val result = scaffoldState.snackbarHostState.showSnackbar(
-                                    message = "Note Deleted",
+                                    message = "Note deleted",
                                     actionLabel = "Undo"
                                 )
-                                if (result == SnackbarResult.ActionPerformed) {
+                                if(result == SnackbarResult.ActionPerformed) {
                                     viewModel.onEvent(NotesEvent.RestoreNote)
                                 }
                             }
@@ -110,8 +113,6 @@ fun NotesScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-
         }
     }
-
 }
